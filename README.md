@@ -52,6 +52,36 @@ The symmetric FIR structure uses the relationship between coefficients on either
 
 The top-level design also provides a UART bypass mode for communication testing. Refer to the XDC constraints and RTL for the exact switch and button assignments.
 
+## Results and Performance
+
+The FIR filter was evaluated using audio and biomedical signal-processing demonstrations. The project report records the following results:
+
+| Test | Reported result |
+|---|---|
+| Audio filtering | High-frequency noise attenuation of approximately 57 dB in LPF mode |
+| High-pass filtering | Low-frequency component attenuation of approximately 68 dB in HPF mode |
+| Biomedical BPF | 8–12 Hz band power increased from 56% to 92% of the analysed signal power |
+| Biomedical BSF | 50 Hz mains-interference reduction of approximately 74 dB |
+
+The report also describes processing 480,000 speech samples and comparing the FPGA output against a software reference.
+
+### Visual Results
+
+**Frequency response**
+
+![FIR filter mode frequency responses](docs/mode_responses.png)
+
+**Audio signal processing**
+
+![FIR filter output plots](pc/fir_result.png)
+
+**Biomedical signal processing**
+
+![Biomedical signal processing output plots](pc/bio_result.png)
+
+*Note: The numerical values above are reported in the project report. Reproduce and confirm them against the current RTL, coefficient set, and test data before presenting them as verified results for the latest revision.*
+
+
 ## Repository Structure
 
 ```text
@@ -95,7 +125,7 @@ FPGA-FIR-Filter-UART-Signal-Analysis/
 Open the Vivado-configured command prompt, navigate to the repository root, and execute:
 
 ```bat
-vivado -mode batch -source scripts\build_modes_batch.tcl
+vivado -mode batch -source scripts/build_modes_batch.tcl
 ```
 
 The build script is configured to generate the FPGA implementation. Check the script for the configured output directory and bitstream filename.
@@ -109,10 +139,10 @@ Connect the Nexys A7 board to the host computer and identify its serial port. Se
 Example commands, executed from the repository root:
 
 ```bat
-python pc\fir_audio.py --port COMx --wav wav\netaji_high_frequency_noise.wav --mode lpf
-python pc\fir_audio.py --port COMx --wav wav\netaji_high_frequency_noise.wav --mode hpf
-python pc\fir_bio.py --wav wav\eegreal_bpf_40Hz.wav --mode bpf --port COMx
-python pc\fir_bio.py --wav wav\eegreal_bsf_200Hz_hum.wav --mode bsf --port COMx
+python pc/fir_audio.py --port COMx --wav wav/netaji_high_frequency_noise.wav --mode lpf
+python pc/fir_audio.py --port COMx --wav wav/netaji_high_frequency_noise.wav --mode hpf
+python pc/fir_bio.py --wav wav/eegreal_bpf_40Hz.wav --mode bpf --port COMx
+python pc/fir_bio.py --wav wav/eegreal_bsf_200Hz_hum.wav --mode bsf --port COMx
 ```
 
 Replace `COMx` with the serial port assigned to the FPGA board. Check each script's help output for supported arguments and operating requirements.
@@ -129,4 +159,8 @@ For hardware validation, compare the FPGA output with a software reference using
 
 ## Notes and Limitations
 
--
+- The reported performance values are taken from the project report and should be revalidated against the current RTL and coefficient set.
+- Filter performance depends on the input signal, sampling frequency, coefficient design, and fixed-point arithmetic.
+- UART throughput and processing latency depend on the configured baud rate and implementation.
+- The Python utilities provide host-side signal preparation, communication, and result analysis; they are not part of the FPGA datapath.
+- Hardware validation requires a compatible FPGA board, a programmed bitstream, and a working UART connection.
